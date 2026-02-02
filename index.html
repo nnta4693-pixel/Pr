@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>POS System - ဘောင်ချာစနစ်</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+    <!-- Main POS Interface -->
+    <div id="userPage" class="page active">
+        <div class="header">
+            <h2 id="shopName"><i class="fas fa-store"></i> ကျွန်ုပ်တို့ဆိုင်</h2>
+            <button id="adminBtn" class="admin-btn">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
+
+        <div class="container">
+            <!-- Product Input Section -->
+            <div class="card">
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-barcode"></i> ကုန်ပစ္စည်း ID</label>
+                    <input type="text" id="productId" class="form-control" placeholder="ကုန်ပစ္စည်း ID ရိုက်ထည့်ပါ">
+                    <div id="suggestions" class="suggestions-container"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-list-ol"></i> အရေအတွက်</label>
+                    <input type="number" id="quantity" class="form-control" value="1" min="1">
+                </div>
+
+                <button id="addProduct" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> ထည့်မည်
+                </button>
+
+                <div class="form-group service-fee-group">
+                    <label class="form-label"><i class="fas fa-concierge-bell"></i> ဝန်ဆောင်ခ (ks)</label>
+                    <input type="number" id="serviceFee" class="form-control" placeholder="ဝန်ဆောင်ခ" value="0">
+                </div>
+            </div>
+
+            <!-- Cart Display -->
+            <div class="card product-list" id="productList">
+                <div class="empty-state">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>ကုန်ပစ္စည်းမရှိသေးပါ</p>
+                </div>
+            </div>
+
+            <!-- Total Section -->
+            <div class="card total-card">
+                <div class="total-row">
+                    <span class="total-label">စုစုပေါင်း:</span>
+                    <span id="totalAmount" class="total-value">0 ks</span>
+                </div>
+                <div class="total-row">
+                    <span class="total-label">ကျသင့်ငွေ:</span>
+                    <span id="grandTotalValue" class="total-value grand-total">0 ks</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <button id="showPreview" class="btn btn-primary btn-large">
+                <i class="fas fa-receipt"></i> ဘောင်ချာကြည့်မည်
+            </button>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPage" class="page">
+        <div class="header">
+            <h2><i class="fas fa-user-cog"></i> Admin Panel</h2>
+            <button id="backToUser" class="admin-btn btn-secondary">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="container">
+            <!-- Login Form -->
+            <div id="loginForm" class="card">
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-lock"></i> လျှို့ဝှက်နံပါတ်</label>
+                    <input type="password" id="password" class="form-control" placeholder="လျှို့ဝှက်နံပါတ်ထည့်ပါ">
+                </div>
+                <button id="loginBtn" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> ဝင်မည်
+                </button>
+            </div>
+
+            <!-- Admin Section -->
+            <div id="adminSection" class="admin-section">
+                <!-- Shop Info -->
+                <button id="shopInfoBtn" class="btn btn-warning btn-full">
+                    <i class="fas fa-store"></i> ဆိုင်အချက်အလက်
+                </button>
+
+                <div id="shopInfoCard" class="card hidden">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-sign"></i> ဆိုင်အမည်</label>
+                        <input type="text" id="editShopName" class="form-control" placeholder="ဆိုင်အမည်">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-map-marker-alt"></i> လိပ်စာ</label>
+                        <input type="text" id="editShopAddress" class="form-control" placeholder="လိပ်စာ">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-phone"></i> ဖုန်းနံပါတ်</label>
+                        <input type="text" id="editShopPhone" class="form-control" placeholder="ဖုန်းနံပါတ်">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-key"></i> လျှို့ဝှက်နံပါတ်အသစ်</label>
+                        <input type="password" id="newPassword" class="form-control" placeholder="လျှို့ဝှက်နံပါတ်အသစ်">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-table"></i> Google Sheet ID</label>
+                        <input type="text" id="googleSheetId" class="form-control" placeholder="Google Sheet ID">
+                        <small class="form-help">ဥပမာ: 14430ljYwNmpghKNO9Z0r-Eqr-F1-WBIbmRYUE3Sro9c</small>
+                    </div>
+
+                    <button id="saveShopInfo" class="btn btn-primary btn-full">
+                        <i class="fas fa-save"></i> သိမ်းမည်
+                    </button>
+                </div>
+
+                <!-- Product Management -->
+                <h3 class="section-title"><i class="fas fa-boxes"></i> ကုန်ပစ္စည်းစီမံခန့်ခွဲမှု</h3>
+
+                <div class="button-group">
+                    <button id="showProductList" class="btn btn-warning">
+                        <i class="fas fa-list"></i> စာရင်းကြည့်မည်
+                    </button>
+                    <button id="addNewProductBtn" class="btn btn-warning">
+                        <i class="fas fa-plus"></i> အသစ်ထည့်မည်
+                    </button>
+                </div>
+
+                <!-- Sync Section -->
+                <div class="sync-section">
+                    <button id="syncProducts" class="btn btn-info btn-full">
+                        <i class="fas fa-sync-alt"></i> Google Sheet မှ ဒေတာများ ဆွဲချမည်
+                    </button>
+                    <div id="syncStatus" class="sync-status"></div>
+                </div>
+
+                <!-- Export Buttons -->
+                <div class="export-buttons">
+                    <button onclick="exportProducts('txt')" class="export-btn export-txt">
+                        <i class="fas fa-file-alt"></i> TXT
+                    </button>
+                    <button onclick="exportProducts('excel')" class="export-btn export-excel">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+                    <button onclick="exportProducts('json')" class="export-btn export-json">
+                        <i class="fas fa-file-code"></i> JSON
+                    </button>
+                </div>
+                <!-- Clear Data Button -->
+<div class="danger-section" style="margin-top: var(--spacing-lg);">
+    <button id="clearData" class="btn btn-secondary btn-full" style="background: linear-gradient(135deg, #ff5252, #d32f2f);">
+        <i class="fas fa-trash-alt"></i> Local Data အားလုံးဖျက်မည်
+    </button>
+</div>
+
+                <!-- Product List -->
+                <div id="productListSection" class="hidden">
+                    <div class="table-container">
+                        <table class="product-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>ကုန်ပစ္စည်း</th>
+                                    <th>ယူဈေး</th>
+                                    <th>အမြတ်%</th>
+                                    <th>ဈေးနှုန်း</th>
+                                
+                               </tr>
+                            </thead>
+                            <tbody id="adminProductList"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Add Product Form -->
+                <div id="addProductSection" class="card hidden">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-barcode"></i> ID</label>
+                        <input type="text" id="newProductId" class="form-control" placeholder="ကုန်ပစ္စည်း ID">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-tag"></i> ကုန်ပစ္စည်းအမည်</label>
+                        <input type="text" id="newProductName" class="form-control" placeholder="ကုန်ပစ္စည်းအမည်">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-money-bill-wave"></i> ယူဈေး</label>
+                        <input type="number" id="newProductCost" class="form-control" placeholder="ယူဈေး" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-percentage"></i> အမြတ်ရာခိုင်နှုန်း</label>
+                        <input type="number" id="newProductProfit" class="form-control" placeholder="အမြတ်%" min="0" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-tags"></i> ဈေးနှုန်း</label>
+                        <input type="number" id="newProductPrice" class="form-control" placeholder="ဈေးနှုန်း" readonly>
+                    </div>
+
+                    <button id="addProductConfirm" class="btn btn-primary btn-full">
+                        <i class="fas fa-check"></i> အတည်ပြုမည်
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Preview -->
+    <div id="previewPage" class="page">
+        <div class="header">
+            <button id="backToCart" class="btn btn-info">
+                <i class="fas fa-arrow-left"></i> နောက်သို့
+            </button>
+        </div>
+
+        <div class="container">
+            <div class="preview-content">
+                <div class="invoice-header">
+                    <div class="invoice-title" id="previewShopName">ကျွန်ုပ်တို့ဆိုင်</div>
+                    <div class="invoice-meta" id="previewAddress">လိပ်စာ: မသိ</div>
+                    <div class="invoice-meta" id="previewPhone">ဖုန်း: 09xxxxxxxx</div>
+                    <div class="invoice-meta">ဘောင်ချာအမှတ်: <span id="previewInvoiceNo">001</span></div>
+                    <div class="invoice-meta">ရက်စွဲ: <span id="previewInvoiceDate"></span></div>
+                </div>
+
+                <table class="preview-table">
+                    <thead>
+                        <tr>
+                            <th>ကုန်ပစ္စည်း</th>
+                            <th>အရေအတွက်</th>
+                            <th>စုစုပေါင်း</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewItems"></tbody>
+                </table>
+
+                <div class="invoice-footer">
+                    <div class="invoice-row">
+                        <span>စုစုပေါင်း:</span>
+                        <span id="previewSubtotal">0 ks</span>
+                    </div>
+                    <div class="invoice-row">
+                        <span>ဝန်ဆောင်ခ:</span>
+                        <span id="previewServiceFee">0 ks</span>
+                    </div>
+                    <div class="invoice-row grand-total-row">
+                        <span>ကျသင့်ငွေ:</span>
+                        <span id="previewGrandTotal">0 ks</span>
+                    </div>
+                    <div class="thank-you-message">
+                        <i class="fas fa-heart"></i> ဝယ်ယူမှုကျေးဇူးတင်ပါသည် <i class="fas fa-heart"></i>
+                    </div>
+                </div>
+
+                <!-- Receipt Actions -->
+                <div class="receipt-actions">
+                    <button id="saveReceipt" class="btn btn-success">
+                        <i class="fas fa-save"></i> သိမ်းမည်
+                    </button>
+                    <button id="viewHistory" class="btn btn-info">
+                        <i class="fas fa-history"></i> ကြည့်မည်
+                    </button>
+                    <button id="downloadReceipt" class="btn btn-warning">
+                        <i class="fas fa-download"></i> ဒေါင်းလုဒ်
+                    </button>
+                </div>
+
+                <!-- Print Options -->
+                <div class="print-options">
+                    <button id="printBluetooth" class="btn btn-secondary">
+                        <i class="fas fa-bluetooth"></i> Bluetooth
+                    </button>
+                    <button id="printSystem" class="btn btn-secondary">
+                        <i class="fas fa-print"></i> ပုံနှိပ်မည်
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="historyModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-history"></i> ဘောင်ချာမှတ်တမ်း</h3>
+                <button id="closeHistory" class="btn btn-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Indicators -->
+    <div id="bluetoothStatus" class="status-indicator bluetooth-status">
+        <i class="fas fa-bluetooth"></i>
+        <span>မချိတ်ဆက်ရသေး</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/data-manager.js"></script>
+    <script src="js/google-sheets.js"></script>
+    <script src="js/cart-manager.js"></script>
+    <script src="js/receipt-manager.js"></script>
+     <script src="js/bluetooth-printer.js"></script>
+    <script src="js/ui-manager.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
