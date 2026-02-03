@@ -381,18 +381,33 @@ class UIManager {
         this.receiptManager.exportReceiptToExcel();
     }
 
-    async printBluetoothReceipt() {
-        try {
-            this.showLoading('printBluetooth', true);
-            const receipt = this.receiptManager.generateReceipt();
-            await this.bluetoothPrinter.printReceipt(receipt);
-            this.showAlert('ဘောင်ချာပုံနှိပ်ပြီးပါပြီ!', 'success');
-        } catch (error) {
-            this.showAlert(`Print error: ${error.message}`, 'error');
-        } finally {
-            this.showLoading('printBluetooth', false);
-        }
+    // ui-manager.js ထဲမှာ ဒီ function ကိုရှာပြီး ပြင်ပါ
+async printBluetoothReceipt() {
+    try {
+        // Loading state ပြပါ
+        const printBtn = document.getElementById('printBluetooth');
+        const originalText = printBtn.innerHTML;
+        printBtn.innerHTML = '<div class="loading"></div> ပုံနှိပ်နေသည်...';
+        printBtn.disabled = true;
+        
+        // Print လုပ်ပါ
+        const receipt = this.receiptManager.generateReceipt();
+        await this.bluetoothPrinter.printReceipt(receipt);
+        
+        // Success message
+        this.showAlert('ဘောင်ချာပုံနှိပ်ပြီးပါပြီ!', 'success');
+        
+    } catch (error) {
+        console.error('Print error:', error);
+        this.showAlert(`ပုံနှိပ်မရ: ${error.message}`, 'error');
+        
+    } finally {
+        // Reset button
+        const printBtn = document.getElementById('printBluetooth');
+        printBtn.innerHTML = '<i class="fas fa-bluetooth"></i> Bluetooth ပုံနှိပ်';
+        printBtn.disabled = false;
     }
+}
 
     printReceipt() {
         const receipt = this.receiptManager.generateReceipt();
