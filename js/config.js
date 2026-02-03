@@ -8,9 +8,9 @@ class Config {
             
             // Default Settings
             DEFAULT_PASSWORD: '200056',
-            DEFAULT_SHOP_NAME: 'ကျွန်ုပ်တို့ဆိုင်',
-            DEFAULT_ADDRESS: 'လိပ်စာ: မသိ',
-            DEFAULT_PHONE: 'ဖုန်း: 09xxxxxxxx',
+            DEFAULT_SHOP_NAME: 'Aung Ko',
+            DEFAULT_ADDRESS: 'address: Tada',
+            DEFAULT_PHONE: 'ph: 09790222504',
             
             // Bluetooth Printer Settings
             BLUETOOTH_SERVICE_UUID: '000018f0-0000-1000-8000-00805f9b34fb',
